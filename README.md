@@ -8,6 +8,7 @@ This project reverse-engineers and refactors Google’s original algorithm to ge
 - Generate full Material Design palettes from a single base hex color
 - Produces primary, complementary, analogous and triadic variations
 - Shows palette preview in image (`pillow` library required)
+- CLI support (`mpg` command)
 - MIT Licensed
 - No dependencies (pure Python)
 
@@ -43,6 +44,28 @@ print(primary_palette)
 
 # preview any palette (`pillow` library must be installed)
 mpg.preview_palettes(primary_palette)
+```
+
+## Command Line Interface (CLI)
+After installing, you can use the mpg command directly from your terminal:
+```bash
+# Generate the primary palette
+mpg "#3f51b5"
+
+# Output as JSON
+mpg "#3f51b5" --json
+
+# Generate specific types
+mpg "#3f51b5" --primary
+mpg "#3f51b5" --complimentary
+mpg "#3f51b5" --analogous
+mpg "#3f51b5" --triadic
+
+# Combine multiple flags
+mpg "#3f51b5" --primary --triadic --json
+
+# Preview palette
+mpg "#3f51b5" --show
 ```
 
 ## Credits
