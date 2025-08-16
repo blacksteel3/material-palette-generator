@@ -14,6 +14,10 @@ def main():
         help="Output palette as JSON instead of plain text"
     )
     parser.add_argument(
+        "--show", action="store_true",
+        help="Preview the palette in an image"
+    )
+    parser.add_argument(
         "--primary", action="store_true",
         help="Get primary color"
     )
@@ -50,6 +54,13 @@ def main():
     else:
         from pprint import pprint
         pprint(output, indent=4)
+
+    if args.show:
+        if not flags:
+            mpg.preview_palettes(output)
+        else:
+            for palette in output.values():
+                mpg.preview_palettes(palette)
 
 if __name__ == "__main__":
     main()
