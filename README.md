@@ -20,7 +20,7 @@ cd material-palette-generator
 
 Or install via `pip`:
 ```bash
-pip install material-palette-generator
+pip install material-palettes-generator
 ```
 
 ## Usage
