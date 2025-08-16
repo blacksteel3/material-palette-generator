@@ -6,7 +6,7 @@ This project reverse-engineers and refactors Google’s original algorithm to ge
 
 ## Features
 - Generate full Material Design palettes from a single base hex color
-- Produces primary, complimentary, analogous and triadic variations
+- Produces primary, complementary, analogous and triadic variations
 - Shows palette preview in image (`pillow` library required)
 - MIT Licensed
 - No dependencies (pure Python)
@@ -31,7 +31,7 @@ import material_palette_generator as mpg
 palettes = mpg.get_palettes("#E91E63")  # optional `types` parameter to specify color types
 
 print(palettes['Primary'])
-print(palettes['Complimentary'])
+print(palettes['Complementary'])
 print(palettes['Analogous-1'])
 print(palettes['Analogous-2'])
 print(palettes['Triadic-1'])
