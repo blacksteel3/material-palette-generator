@@ -71,7 +71,7 @@
 __all__ = (
     'get_palettes', 
     'get_primary_palette',
-    'get_complimentary_palette',
+    'get_complementary_palette',
     'get_analogous_palette',
     'get_triadic_palette',
     'preview_palettes'
@@ -663,9 +663,9 @@ def get_primary_palette(hex_color: str) -> dict[str, str]:
     palette = _generate_palette(rgb)
     return dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette))))
 
-def get_complimentary_palette(hex_color: str) -> dict[str, str]:
+def get_complementary_palette(hex_color: str) -> dict[str, str]:
     """
-    Generate complimentary color palette of base hex color.
+    Generate complementary color palette of base hex color.
 
     Returns a dictionary of 10 shades code and hex color.
     """
@@ -724,18 +724,18 @@ def get_palettes(hex_color: str, types: tuple[str] | None = None) -> dict[str, d
     Returns a dictionary of color types each containing 10 
     shades code and hex color. If :param:`types` is `None`
     then all types are provided. Valid color types are:
-    `'primary'`, `'complimentary'`, `'analogous'`, `'triadic'`.
+    `'primary'`, `'complementary'`, `'analogous'`, `'triadic'`.
     """
 
     output = {}
     if types is None:
-        types = 'primary', 'complimentary', 'analogous', 'triadic'
+        types = 'primary', 'complementary', 'analogous', 'triadic'
     
     if 'primary' in types:
         output['Primary'] = get_primary_palette(hex_color)
 
-    if 'complimentary' in types:
-        output['Complimentary'] = get_complimentary_palette(hex_color)
+    if 'complementary' in types:
+        output['Complementary'] = get_complementary_palette(hex_color)
 
     if 'analogous' in types:
         output.update(get_analogous_palette(hex_color))
