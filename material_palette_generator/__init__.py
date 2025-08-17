@@ -408,6 +408,9 @@ def _generate_palette(rgb_color, b=None):
 
     return [convert_color(item, i) for i, item in enumerate(b)]
 
+def rotate_rgb(color: RGB, angle: int | float):
+    return hsl_to_rgb(rgb_to_hsl(color).rotate(angle))
+
 # Bb
 GOLDEN_LAB_PALETTES = [
         [
@@ -652,16 +655,27 @@ CHROMA_WEIGHTS = [1.762442714, 4.213532634, 7.395827458, 11.07174158, 13.8963450
 # Public functions
 SHADES = '50', '100', '200', '300', '400', '500', '600', '700', '800', '900'
 
+def get_palette(hex_color, *angles):
+    rgb = color_from_hex(hex_color)
+
+    output = []
+    if not angles:
+        palette = _generate_palette(rgb)
+        return dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette))))
+    for angle in angles:
+        palette = _generate_palette(rotate_rgb(rgb, angle))
+        output.append(dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette)))))
+
+    return output
+
 def get_primary_palette(hex_color: str) -> dict[str, str]:
     """
     Generate primary color palette based on hex color.
 
     Returns a dictionary of 10 shades code and hex color.
     """
-
-    rgb = color_from_hex(hex_color)
-    palette = _generate_palette(rgb)
-    return dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette))))
+    
+    return get_palette(hex_color)
 
 def get_complementary_palette(hex_color: str) -> dict[str, str]:
     """
@@ -670,10 +684,7 @@ def get_complementary_palette(hex_color: str) -> dict[str, str]:
     Returns a dictionary of 10 shades code and hex color.
     """
 
-    rgb = color_from_hex(hex_color)
-    rotated_rgb = hsl_to_rgb(rgb_to_hsl(rgb).rotate(180))
-    palette = _generate_palette(rotated_rgb)
-    return dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette))))
+    return get_palette(hex_color, 180)[0]
 
 def get_analogous_palette(hex_color: str) -> dict[str, dict[str, str]]:
     """
@@ -683,18 +694,9 @@ def get_analogous_palette(hex_color: str) -> dict[str, dict[str, str]]:
     Analogous-2) each containing 10 shades code and hex color.
     """
 
-    hsl = rgb_to_hsl(color_from_hex(hex_color))
-    output = {}
-
-    rotated_rgb1 = hsl_to_rgb(hsl.rotate(-30))
-    palette1 = _generate_palette(rotated_rgb1)
-    output['Analogous-1'] = dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette1))))
-
-    rotated_rgb2 = hsl_to_rgb(hsl.rotate(30))
-    palette2 = _generate_palette(rotated_rgb2)
-    output['Analogous-2'] = dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette2))))
-    
-    return output
+    names = ['Analogous-1', 'Analogous-2']
+    palettes = get_palette(hex_color, -30, 30)
+    return dict(zip(names, palettes))
     
 def get_triadic_palette(hex_color: str) -> dict[str, dict[str, str]]:
     """
@@ -704,18 +706,9 @@ def get_triadic_palette(hex_color: str) -> dict[str, dict[str, str]]:
     Triadic-2) each containing 10 shades code and hex color.
     """
 
-    hsl = rgb_to_hsl(color_from_hex(hex_color))
-    output = {}
-
-    rotated_rgb1 = hsl_to_rgb(hsl.rotate(60))
-    palette1 = _generate_palette(rotated_rgb1)
-    output['Triadic-1'] = dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette1))))
-
-    rotated_rgb2 = hsl_to_rgb(hsl.rotate(120))
-    palette2 = _generate_palette(rotated_rgb2)
-    output['Triadic-2'] = dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette2))))
-    
-    return output
+    names = ['Triadic-1', 'Triadic-2']
+    palettes = get_palette(hex_color, 60, 120)
+    return dict(zip(names, palettes))
 
 def get_palettes(hex_color: str, types: tuple[str] | None = None) -> dict[str, dict[str, str]]:
     """
@@ -773,5 +766,6 @@ def preview_palettes(palette: dict) -> None:
 
 # Test
 if __name__ == '__main__':
-    palette = get_primary_palette("#E91E63")
-    preview_palettes(palette)
+    palettes = get_palettes("#E91E63")
+    import json
+    print(json.dumps(palettes, indent=4))
