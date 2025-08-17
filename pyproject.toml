@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "material-palettes-generator"
-version = "1.0.1"
+version = "1.1.1"
 description = "Generate Material Design color palettes in Python"
 authors = [{name = "Black Steel", email = "unknown.user2135@proton.me"}]
 readme = "README.md"

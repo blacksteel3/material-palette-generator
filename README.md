@@ -55,17 +55,26 @@ mpg "#3f51b5"
 # Output as JSON
 mpg "#3f51b5" --json
 
+# Output as CSS
+mpg "#3f51b5" --css
+
 # Generate specific types
 mpg "#3f51b5" --primary
-mpg "#3f51b5" --complimentary
+mpg "#3f51b5" --complementary
 mpg "#3f51b5" --analogous
 mpg "#3f51b5" --triadic
 
 # Combine multiple flags
-mpg "#3f51b5" --primary --triadic --json
+mpg "#3f51b5" -p -t --json
+
+# Or get all palettes
+mpg "#3f51b5" --all
 
 # Preview palette
 mpg "#3f51b5" --show
+
+# See all commands
+mpg --help
 ```
 
 ## Credits
