@@ -47,10 +47,10 @@ def main():
     is_all = args.all
     is_json = args.json
     is_css = args.css
-    is_primary = args.p or args.primary
-    is_complementary = args.c or args.complementary
-    is_analogous = args.a or args.analogous
-    is_triadic = args.t or args.triadic
+    is_primary = args.primary
+    is_complementary = args.complementary
+    is_analogous = args.analogous
+    is_triadic = args.triadic
     
     flags = is_all | is_primary | is_complementary | is_analogous | is_triadic
 
