@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "material-palettes-generator"
+version = "1.0.1"
+description = "Generate Material Design color palettes in Python"
+authors = [{name = "Black Steel", email = "unknown.user2135@proton.me"}]
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = []
+
+[project.scripts]
+mpg = "material_palette_generator.cli:main"
