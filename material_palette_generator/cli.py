@@ -51,11 +51,12 @@ def main():
     is_complementary = args.complementary
     is_analogous = args.analogous
     is_triadic = args.triadic
+    base_colors = {} if is_css else None
     
     flags = is_all | is_primary | is_complementary | is_analogous | is_triadic
 
     if not flags:
-        output = mpg.get_primary_palette(color)
+        output = mpg.get_primary_palette(color, base_colors)
     else:
         types = []
         if is_all:
@@ -66,28 +67,29 @@ def main():
             if is_analogous: types.append('analogous')
             if is_triadic: types.append('triadic')
 
-        output = mpg.get_palettes(color, types=types)
+        output = mpg.get_palettes(color, types=types, base_colors=base_colors)
         
     if is_json:
         import json
         print(json.dumps(output, indent=4))
+
     elif is_css:
         print(":root {")
-
         if not flags:
-            for k, v in output.items():
-                print(f"\t--clr-primary-{k}: {v};")
-                if v == color:
-                    print(f"\t--clr-primary: var(--clr-primary-{k});")
+            for code, color in output.items():
+                print(f"    --clr-primary-{code}: {color};")
+                if color == base_colors['primary']:
+                    print(f"    --clr-primary: var(--clr-primary-{code});")
         else:
-            for k, k2 in output.items():
-                for v in k2.values():
-                    k_low = k.lower()
-                    print(f"\t--clr-{k_low}-{k2}: {v};")
-                    if v == color:
-                        print(f"\t--clr-{k_low}: var(--clr-{k_low}-{k2});")
+            for color_type, palette in output.items():
+                for code, color in palette.items():
+                    ct_low = color_type.lower()
+                    print(f"    --clr-{ct_low}-{code}: {color};")
+                    if color == base_colors[ct_low]:
+                        print(f"    --clr-{ct_low}: var(--clr-{ct_low}-{code});")
 
         print("}")
+
     else:
         from pprint import pprint
         pprint(output, indent=4)
@@ -98,6 +100,7 @@ def main():
         else:
             for palette in output.values():
                 mpg.preview_palettes(palette)
+
 
 if __name__ == "__main__":
     main()

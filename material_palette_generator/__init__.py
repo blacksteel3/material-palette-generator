@@ -655,7 +655,7 @@ CHROMA_WEIGHTS = [1.762442714, 4.213532634, 7.395827458, 11.07174158, 13.8963450
 # Public functions
 SHADES = '50', '100', '200', '300', '400', '500', '600', '700', '800', '900'
 
-def get_palette(hex_color, *angles):
+def get_palette(hex_color, angles: list | None = None, base_colors: list = None):
     rgb = color_from_hex(hex_color)
 
     output = []
@@ -663,54 +663,119 @@ def get_palette(hex_color, *angles):
         palette = _generate_palette(rgb)
         return dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette))))
     for angle in angles:
-        palette = _generate_palette(rotate_rgb(rgb, angle))
+        rotated_rgb = rotate_rgb(rgb, angle)
+        if base_colors is not None:
+            base_colors.append(f'#{rgb_to_hex(rotated_rgb)}')
+        palette = _generate_palette(rotated_rgb)
         output.append(dict(zip(SHADES, (map(lambda x: f'#{rgb_to_hex(x)}', palette)))))
 
     return output
 
-def get_primary_palette(hex_color: str) -> dict[str, str]:
+def get_primary_palette(
+        hex_color: str, 
+        base_colors: dict | None = None
+    ) -> dict[str, str]:
     """
     Generate primary color palette based on hex color.
 
     Returns a dictionary of 10 shades code and hex color.
+
+    If you want to get the primary base color, provide
+    :param:`base_colors` dictionary. After function runs
+    completely, `base_colors` will have type base colors
+    included. By default, this dictionary is `None`.
     """
     
+    if base_colors is not None:
+        base_colors['primary'] = hex_color.lower()
     return get_palette(hex_color)
 
-def get_complementary_palette(hex_color: str) -> dict[str, str]:
+def get_complementary_palette(
+        hex_color: str, 
+        base_colors: dict | None = None
+    ) -> dict[str, str]:
     """
     Generate complementary color palette of base hex color.
 
     Returns a dictionary of 10 shades code and hex color.
+
+    If you want to get the complementary base color, provide
+    :param:`base_colors` dictionary. After function runs
+    completely, `base_colors` will have complementary base color
+    included. By default, this dictionary is `None`.
     """
 
-    return get_palette(hex_color, 180)[0]
+    if base_colors is not None:
+        base_colors_list = []
+        output = get_palette(hex_color, angles=(180,), base_colors=base_colors_list)
+        base_colors['complementary'] = base_colors_list[0]
+        return output[0]
 
-def get_analogous_palette(hex_color: str) -> dict[str, dict[str, str]]:
+    return get_palette(hex_color, angles=(180,))[0]
+
+def get_analogous_palette(
+        hex_color: str,
+        base_colors: dict | None = None
+    ) -> dict[str, dict[str, str]]:
     """
     Generate two analogous color palettes of base hex color.
 
     Returns a dictionary of two dictionaries (Analogous-1 and
     Analogous-2) each containing 10 shades code and hex color.
+
+    If you want to get the analogous base colors, provide
+    :param:`base_colors` dictionary. After function runs
+    completely, `base_colors` will have analogous base colors
+    included. By default, this dictionary is `None`.
     """
 
     names = ['Analogous-1', 'Analogous-2']
-    palettes = get_palette(hex_color, -30, 30)
-    return dict(zip(names, palettes))
+
+    if base_colors is not None:
+        base_colors_list = []
+        output = get_palette(hex_color, angles=(-30, 30), base_colors=base_colors_list)
+        base_colors['analogous-1'] = base_colors_list[0]
+        base_colors['analogous-2'] = base_colors_list[1]
+
+        return dict(zip(names, output))
     
-def get_triadic_palette(hex_color: str) -> dict[str, dict[str, str]]:
+    output = get_palette(hex_color, angles=(-30, 30))
+    return dict(zip(names, output))
+    
+def get_triadic_palette(
+        hex_color: str,
+        base_colors: dict | None = None
+    ) -> dict[str, dict[str, str]]:
     """
     Generate two triadic color palettes of base hex color.
 
     Returns a dictionary of two dictionaries (Triadic-1 and
     Triadic-2) each containing 10 shades code and hex color.
+
+    If you want to get the triadic base colors, provide
+    :param:`base_colors` dictionary. After function runs
+    completely, `base_colors` will have triadic base colors
+    included. By default, this dictionary is `None`.
     """
 
     names = ['Triadic-1', 'Triadic-2']
-    palettes = get_palette(hex_color, 60, 120)
-    return dict(zip(names, palettes))
 
-def get_palettes(hex_color: str, types: tuple[str] | None = None) -> dict[str, dict[str, str]]:
+    if base_colors is not None:
+        base_colors_list = []
+        output = get_palette(hex_color, angles=(60, 120), base_colors=base_colors_list)
+        base_colors['triadic-1'] = base_colors_list[0]
+        base_colors['triadic-2'] = base_colors_list[1]
+
+        return dict(zip(names, output))
+    
+    output = get_palette(hex_color, angles=(60, 120))
+    return dict(zip(names, output))
+
+def get_palettes(
+        hex_color: str, 
+        types: tuple[str] | None = None,
+        base_colors: dict = None
+    ) -> dict[str, dict[str, str]]:
     """
     Generate one or more types of color palettes of base hex color.
 
@@ -718,6 +783,11 @@ def get_palettes(hex_color: str, types: tuple[str] | None = None) -> dict[str, d
     shades code and hex color. If :param:`types` is `None`
     then all types are provided. Valid color types are:
     `'primary'`, `'complementary'`, `'analogous'`, `'triadic'`.
+
+    If you want to get the type base colors, provide
+    :param:`base_colors` dictionary. After function runs
+    completely, `base_colors` will have type base colors
+    included. By default, this dictionary is `None`.
     """
 
     output = {}
@@ -725,16 +795,16 @@ def get_palettes(hex_color: str, types: tuple[str] | None = None) -> dict[str, d
         types = 'primary', 'complementary', 'analogous', 'triadic'
     
     if 'primary' in types:
-        output['Primary'] = get_primary_palette(hex_color)
+        output['Primary'] = get_primary_palette(hex_color, base_colors)
 
     if 'complementary' in types:
-        output['Complementary'] = get_complementary_palette(hex_color)
+        output['Complementary'] = get_complementary_palette(hex_color, base_colors)
 
     if 'analogous' in types:
-        output.update(get_analogous_palette(hex_color))
+        output.update(get_analogous_palette(hex_color, base_colors))
 
     if 'triadic' in types:
-        output.update(get_triadic_palette(hex_color))
+        output.update(get_triadic_palette(hex_color, base_colors))
 
     return output
 
@@ -766,6 +836,5 @@ def preview_palettes(palette: dict) -> None:
 
 # Test
 if __name__ == '__main__':
-    palettes = get_palettes("#E91E63")
-    import json
-    print(json.dumps(palettes, indent=4))
+    output = get_primary_palette("#E91E63")
+    preview_palettes(output)
