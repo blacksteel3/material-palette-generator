@@ -36,7 +36,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/blacksteel3/material-palette-generator"
 Documentation = "https://github.com/blacksteel3/material-palette-generator#readme"
-Bug Tracker = "https://github.com/blacksteel3/material-palette-generator/issues"
+"Bug Tracker" = "https://github.com/blacksteel3/material-palette-generator/issues"
 
 [project.scripts]
 mpg = "material_palette_generator.cli:main"
