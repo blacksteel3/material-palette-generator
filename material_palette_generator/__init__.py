@@ -80,6 +80,8 @@ __all__ = (
 import math
 from math import sqrt
 from decimal import Decimal, ROUND_HALF_UP
+from typing import List, Dict, Optional, Union, Self
+
 
 def round2(n):
     return int(Decimal(n).to_integral_value(rounding=ROUND_HALF_UP))
@@ -95,33 +97,53 @@ def clamp(a, b, c):
 # O
 EPS = 2 ** -16
 
+
 # P
 class RGB:
-    def __init__(self, red, green, blue, alpha=1):
+    def __init__(
+            self, 
+            red: Union[int, float], 
+            green: Union[int, float], 
+            blue: Union[int, float], 
+            alpha: Union[int, float] = 1
+        ) -> None:
+
         self.red = red
         self.green = green
         self.blue = blue
         self.alpha = alpha
 
+
 # T
 class HSL:
-    def __init__(self, hue, saturation, lightness, alpha=1):
+    def __init__(
+            self, 
+            hue: Union[int, float], 
+            saturation: Union[int, float], 
+            lightness: Union[int, float], 
+            alpha: Union[int, float] = 1
+        ) -> None:
+        
         self.hue = hue
         self.saturation = saturation
         self.lightness = lightness
         self.alpha = alpha
 
-    def rotate(self, val):
-        return HSL(
-            (self.hue + val + 360) % 360,
-            self.saturation,
-            self.lightness,
-            self.alpha
-        )
+    def rotate(self, val: Union[int, float]) -> Self:
+        self.hue = (self.hue + val + 360) % 360
+        return self
+
 
 # wb
 class LCh: 
-    def __init__(self, l, c, h, alpha=1):
+    def __init__(
+            self, 
+            l: Union[int, float], 
+            c: Union[int, float], 
+            h: Union[int, float], 
+            alpha: Union[int, float] = 1
+        ) -> None:
+
         self.l = l
         self.c = c
         self.h = h
@@ -129,15 +151,21 @@ class LCh:
 
 # V
 class LAB:
-    def __init__(self, l, a, b, alpha=1):
+    def __init__(
+            self, 
+            l: Union[int, float], 
+            a: Union[int, float], 
+            b: Union[int, float], 
+            alpha: Union[int, float] = 1
+        ) -> None:
         self.l = l
         self.a = a
         self.b = b
         self.alpha = alpha
 
 # rb
-def rgb_to_hsl(rgb_color):
-    r, g, b = rgb_color.red, rgb_color.green, rgb_color.blue
+def rgb_to_hsl(color: RGB) -> HSL:
+    r, g, b = color.red, color.green, color.blue
     max_v = max(r, g, b)
     min_v = min(r, g, b)
     delta = max_v - min_v
@@ -160,10 +188,16 @@ def rgb_to_hsl(rgb_color):
 
     h = round2(h + 360) % 360
 
-    return HSL(h, s, l, rgb_color.alpha)
+    return HSL(h, s, l, color.alpha)
 
 # kb
-def hsv_chroma_match_to_rgb(hue, alpha, chroma, _match):
+def hsv_chroma_match_to_rgb(
+        hue: Union[int, float], 
+        alpha: Union[int, float], 
+        chroma: Union[int, float], 
+        _match: Union[int, float]
+    ) -> RGB:
+
     r = g = b = _match
     hue = (hue % 360) / 60
     x = chroma * (1 - abs(hue % 2 - 1))
@@ -191,20 +225,20 @@ def hsv_chroma_match_to_rgb(hue, alpha, chroma, _match):
     return RGB(r, g, b, alpha)
 
 # lb
-def hsl_to_rgb(hsl_color: HSL):
-    b = (1 - abs(2 * hsl_color.lightness - 1)) * hsl_color.saturation
-    return hsv_chroma_match_to_rgb(hsl_color.hue, hsl_color.alpha, b, max(0, hsl_color.lightness - b/2))
+def hsl_to_rgb(color: HSL) -> RGB:
+    b = (1 - abs(2 * color.lightness - 1)) * color.saturation
+    return hsv_chroma_match_to_rgb(color.hue, color.alpha, b, max(0, color.lightness - b/2))
 
 # R
-def srgb_to_linear(val):
+def srgb_to_linear(val: Union[int, float]) -> float:
     return val / 12.92 if val <= 0.04045 else ((val + 0.055) / 1.055) ** 2.4
 
 # yb
-def linear_to_srgb(val):
+def linear_to_srgb(val: Union[int, float]) -> float:
     return 12.92 * val if val <= 0.0031308 else 1.055 * (val ** (1 / 2.4)) - 0.055
 
 # W
-def xyz_to_lab_component(val):
+def xyz_to_lab_component(val: Union[int, float]) -> float:
     b = 6 / 29
     c = 1 / (3 * (b ** 2))
     if val > b ** 3:
@@ -213,7 +247,7 @@ def xyz_to_lab_component(val):
         return c * val + 4 / 29
 
 # zb
-def lab_to_xyz_component(val):
+def lab_to_xyz_component(val: Union[int, float]) -> float:
     b = 6 / 29
     c = 3 * (b ** 2)
     if val > b:
@@ -222,37 +256,37 @@ def lab_to_xyz_component(val):
         return c * (val - 4 / 29)
 
 # nb
-def color_from_hex(code):
+def color_from_hex(code: str) -> RGB:
     code = code.lstrip('#')
     r = int(code[0:2], 16) / 255
     g = int(code[2:4], 16) / 255
     b = int(code[4:6], 16) / 255
     
-    return RGB(r, g, b, 1.0)
+    return RGB(r, g, b, 1)
 
 # Q
-def rgb_to_hex(rgb_color):
-    r = hex2(round2(255 * rgb_color.red))
-    g = hex2(round2(255 * rgb_color.green))
-    b = hex2(round2(255 * rgb_color.blue))
-    if rgb_color.alpha < 1:
-        a_hex = hex2(round2(255 * rgb_color.alpha))
+def rgb_to_hex(color: RGB) -> str:
+    r = hex2(round2(255 * color.red))
+    g = hex2(round2(255 * color.green))
+    b = hex2(round2(255 * color.blue))
+    if color.alpha < 1:
+        a_hex = hex2(round2(255 * color.alpha))
     else:
         a_hex = ""
     return r + g + b + a_hex
 
 # Ab
-def cartesian_to_hue(y, x):
+def cartesian_to_hue(y: Union[int, float], x: Union[int, float]) -> float:
     if abs(y) < 1e-4 and abs(x) < 1e-4:
-        return 0
+        return 0.0
     angle = math.degrees(math.atan2(y, x))
     return angle if angle >= 0 else angle + 360
 
 # vb
-def rgb_to_lab(rgb_color: RGB):
-    r_ = srgb_to_linear(rgb_color.red)
-    g_ = srgb_to_linear(rgb_color.green)
-    b_ = srgb_to_linear(rgb_color.blue)
+def rgb_to_lab(color: RGB) -> LAB:
+    r_ = srgb_to_linear(color.red)
+    g_ = srgb_to_linear(color.green)
+    b_ = srgb_to_linear(color.blue)
 
     y = 0.2126729 * r_ + 0.7151522 * g_ + 0.072175 * b_
 
@@ -260,16 +294,20 @@ def rgb_to_lab(rgb_color: RGB):
     a = 500 * (xyz_to_lab_component((0.4124564 * r_ + 0.3575761 * g_ + 0.1804375 * b_) / 0.95047) - xyz_to_lab_component(y))
     b = 200 * (xyz_to_lab_component(y) - xyz_to_lab_component((0.0193339 * r_ + 0.119192 * g_ + 0.9503041 * b_) / 1.08883))
 
-    return LAB(L, a, b, rgb_color.alpha)
+    return LAB(L, a, b, color.alpha)
 
 # xb
-def lab_to_lch(lab_color: LAB):
-    chroma = sqrt(lab_color.a ** 2 + lab_color.b ** 2)
-    hue = (math.degrees(math.atan2(lab_color.b, lab_color.a)) + 360) % 360
-    return LCh(lab_color.l, chroma, hue, lab_color.alpha)
+def lab_to_lch(color: LAB) -> LCh:
+    chroma = sqrt(color.a ** 2 + color.b ** 2)
+    hue = (math.degrees(math.atan2(color.b, color.a)) + 360) % 360
+    return LCh(color.l, chroma, hue, color.alpha)
 
 # Qb
-def find_nearest_palette(lab_color: LAB, b=None):
+def find_nearest_palette(
+        color: LAB, 
+        b: Optional[List[List[LAB]]] = None
+    ) -> Dict[str, List[LAB]]:
+
     if b is None:
         b = GOLDEN_LAB_PALETTES
 
@@ -286,19 +324,19 @@ def find_nearest_palette(lab_color: LAB, b=None):
                 break
 
             k = b[g][h]
-            l = (k.l + lab_color.l) / 2
+            l = (k.l + color.l) / 2
             m = sqrt(k.a ** 2 + k.b ** 2)
-            q = sqrt(lab_color.a ** 2 + lab_color.b ** 2)
+            q = sqrt(color.a ** 2 + color.b ** 2)
             t = (m + q) / 2
             t = 0.5 * (1 - sqrt((t ** 7) / ((t ** 7) + (25 ** 7))))
             n = k.a * (1 + t)
-            r = lab_color.a * (1 + t)
+            r = color.a * (1 + t)
             N = sqrt((n ** 2) + (k.b ** 2))
-            H = sqrt(r ** 2 + lab_color.b ** 2)
+            H = sqrt(r ** 2 + color.b ** 2)
             t = H - N
             ja = (N + H) / 2
             n = cartesian_to_hue(k.b, n)
-            r = cartesian_to_hue(lab_color.b, r)
+            r = cartesian_to_hue(color.b, r)
 
             if abs(m) < 1e-4 or abs(q) < 1e-4:
                 delta_hue = 0
@@ -327,7 +365,7 @@ def find_nearest_palette(lab_color: LAB, b=None):
                 + 0.32 * math.cos(math.radians(3 * m + 6))
                 - 0.2 * math.cos(math.radians(4 * m - 63))
             )
-            delta_L = (lab_color.l - k.l) / (
+            delta_L = (color.l - k.l) / (
                 1 + 0.015 * ((l - 50) ** 2) / math.sqrt(20 + (l - 50) ** 2)
             )
             term1 = delta_L ** 2
@@ -352,11 +390,15 @@ def find_nearest_palette(lab_color: LAB, b=None):
     }
 
 # X
-def _generate_palette(rgb_color, b=None):
+def _generate_palette(
+        color: RGB, 
+        b: Optional[List[List[LAB]]] = None
+    ) -> List[RGB]:
+
     if b is None:
         b = GOLDEN_LAB_PALETTES
 
-    c = rgb_to_lab(rgb_color)
+    c = rgb_to_lab(color)
     d = find_nearest_palette(c, b)
     b = d['fc']
     d = d['ec']
@@ -375,7 +417,7 @@ def _generate_palette(rgb_color, b=None):
         nonlocal r
         if b_item is e:
             r = max(h.l - 1.7, 0)
-            return rgb_color
+            return color
 
         b_lch = lab_to_lch(b_item)
 
@@ -408,7 +450,7 @@ def _generate_palette(rgb_color, b=None):
 
     return [convert_color(item, i) for i, item in enumerate(b)]
 
-def rotate_rgb(color: RGB, angle: int | float):
+def rotate_rgb(color: RGB, angle: Union[int, float]) -> RGB:
     return hsl_to_rgb(rgb_to_hsl(color).rotate(angle))
 
 # Bb
@@ -655,7 +697,12 @@ CHROMA_WEIGHTS = [1.762442714, 4.213532634, 7.395827458, 11.07174158, 13.8963450
 # Public functions
 SHADES = '50', '100', '200', '300', '400', '500', '600', '700', '800', '900'
 
-def get_palette(hex_color, angles: list | None = None, base_colors: list = None):
+def get_palette(
+        hex_color: str, 
+        angles: Optional[List[Union[int, float]]] = None, 
+        base_colors: Optional[List] = None
+    ) -> List[str]:
+
     rgb = color_from_hex(hex_color)
 
     output = []
@@ -673,8 +720,8 @@ def get_palette(hex_color, angles: list | None = None, base_colors: list = None)
 
 def get_primary_palette(
         hex_color: str, 
-        base_colors: dict | None = None
-    ) -> dict[str, str]:
+        base_colors: Optional[Dict] = None
+    ) -> Dict[str, str]:
     """
     Generate primary color palette based on hex color.
 
@@ -692,7 +739,7 @@ def get_primary_palette(
 
 def get_complementary_palette(
         hex_color: str, 
-        base_colors: dict | None = None
+        base_colors: Optional[Dict] = None
     ) -> dict[str, str]:
     """
     Generate complementary color palette of base hex color.
@@ -715,8 +762,8 @@ def get_complementary_palette(
 
 def get_analogous_palette(
         hex_color: str,
-        base_colors: dict | None = None
-    ) -> dict[str, dict[str, str]]:
+        base_colors: Optional[Dict] = None
+    ) -> Dict[str, Dict[str, str]]:
     """
     Generate two analogous color palettes of base hex color.
 
@@ -744,8 +791,8 @@ def get_analogous_palette(
     
 def get_triadic_palette(
         hex_color: str,
-        base_colors: dict | None = None
-    ) -> dict[str, dict[str, str]]:
+        base_colors: Optional[Dict] = None
+    ) -> Dict[str, Dict[str, str]]:
     """
     Generate two triadic color palettes of base hex color.
 
@@ -773,9 +820,9 @@ def get_triadic_palette(
 
 def get_palettes(
         hex_color: str, 
-        types: tuple[str] | None = None,
-        base_colors: dict = None
-    ) -> dict[str, dict[str, str]]:
+        types: Optional[List[str]] = None,
+        base_colors: Optional[Dict] = None
+    ) -> Dict[str, Dict[str, str]]:
     """
     Generate one or more types of color palettes of base hex color.
 
@@ -808,8 +855,7 @@ def get_palettes(
 
     return output
 
-# Bonus
-def preview_palettes(palette: dict) -> None:
+def preview_palettes(palette: Dict[str, str]) -> None:
     """
     Displays horizontal preview image of the given 
     color palette using the `Pillow` library.
