@@ -78,6 +78,6 @@ mpg --help
 ```
 
 ## Credits
-- **[Google](www.google.com)** — for creating the Material Design color algorithm
+- **[Google](https://www.google.com)** — for creating the Material Design color algorithm
 - **[Michael Edelstone](https://github.com/edelstone)** — for extracting the obfuscated JavaScript runtime code
 - **[Black Steel](https://github.com/blacksteel3)** — for reverse-engineering, renaming, and porting the algorithm to Python
